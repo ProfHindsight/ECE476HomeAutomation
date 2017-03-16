@@ -14,9 +14,7 @@
 #include "Serial.h"
 #include "ctp.h"
 
-extern chip_values_struct chip;
-extern int send_temp[4];
-extern bool update_user_interface;
+extern volatile bool update_user_interface;
 
 
 // we'll use delay() as a "software delay" function; it should produce 
@@ -35,7 +33,8 @@ int main (void)
 {
 	int tar_temp = 0;
 	int delta = 0;
-	int data[5];
+	uint8_t lights_data[4];
+	int temp_data[4];
 	unsigned int cursor_line = 0;
 	unsigned int num_lines = 0;
 
@@ -107,7 +106,9 @@ int main (void)
 		while(Check_Joystick())
 		{
 			if(update_user_interface){
-				Menu_Screen_Update_Data(get_set_temperature(), send_temp, chip.lights, get_heat(), get_cooling());
+				copy_current_temp(temp_data);
+				copy_current_lights(lights_data);
+				Menu_Screen_Update_Data(get_set_temperature(), temp_data, lights_data, get_current_heating(), get_current_cooling());
 				update_user_interface = 0;
 			}
 			Update_Joystick();
@@ -147,16 +148,16 @@ int main (void)
 					switch(cursor_line)
 					{
 						case 1:
-							light_switch(1,!chip.lights[0]);
+							light_switch(1,!lights_data[0]);
 						break;
 						case 2:
-							light_switch(2,!chip.lights[1]);
+							light_switch(2,!lights_data[1]);
 						break;
 						case 3:
-							light_switch(3,!chip.lights[2]);
+							light_switch(3,!lights_data[2]);
 						break;
 						case 4:
-							light_switch(4,!chip.lights[3]);
+							light_switch(4,!lights_data[3]);
 						break;
 						case 5:
 							Menu_Change_Screen(0);
@@ -179,8 +180,5 @@ int main (void)
 					break;
 			}
 		}
-		
-		
-		
 	}
 }
