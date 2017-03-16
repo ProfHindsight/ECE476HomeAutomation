@@ -16,7 +16,6 @@
 #include "ctp.h"
 #include "Menu_Screens.h"
 
-#define DEBUG_PINS
 
 static char text[10];					//Used for sending data/commands
 extern uint16_t AD_last[4];  	// Last converted values   
@@ -24,13 +23,12 @@ extern uint8_t  AD_done;  		// AD conversion done flag
 static int16_t temp_last[4];	//Used to see if temperature changed.
 extern const uint8_t commandLength;
 volatile bool update_user_interface = 0;	//Flag to be used to update the user interface
-int send_temp[4];
 static const int32_t q15_temp_coefs[2] = {-15099,56146609};
 static const uint8_t light_pin_map[4] = {21, 23, 20, 24};
 
 
 //Store the values in the variable CHIP
-chip_values_struct chip = {
+static chip_values_struct chip = {
 	{0,0,0,0},							//temp
 	{0,0,0,0},							//lights
 	0,											//heating
@@ -56,13 +54,45 @@ typedef enum {
 onboard_screens current_ob_screen = ob_screen_main;
 
 
-climate_control_struct user = {
+static climate_control_struct user = {
 	700,					//target temp
 	20,					//hysteresis
 	720,					//hysteresis upper
 	680,					//hysteresis lower
 	Room2				//Room to measure
 };
+
+
+/*Get the current set temperature for climate control*/
+int16_t get_set_temperature(void) {
+	return user.target_temp / 10;
+}
+
+/*Get the current temperatures stored on the chip*/
+void copy_current_temp(int* send_temp){
+	send_temp[0] = chip.temp[0]/10;
+	send_temp[1] = chip.temp[1]/10;
+	send_temp[2] = chip.temp[2]/10;
+	send_temp[3] = chip.temp[3]/10;
+}
+
+/*Get the current light statuses */
+void copy_current_lights(uint8_t* lights){
+	lights[0] = chip.lights[0];
+	lights[1] = chip.lights[1];
+	lights[2] = chip.lights[2];
+	lights[3] = chip.lights[3];
+}
+
+/*Get the status of the AC. 1 is on, 0 is off*/
+uint8_t get_current_cooling(void) {
+	return chip.AC;
+}
+
+/*Get the status of the heat. 1 is on, 0 is off*/
+uint8_t get_current_heating(void){
+	return chip.heat;
+}
 
 
 void ctp_init(void) {
@@ -100,13 +130,7 @@ void ctp_init(void) {
 //room number if need be.
 void update_app(update_app_passthrough change, uint8_t number) {
 	
-
-	send_temp[0] = chip.temp[0]/10;
-	send_temp[1] = chip.temp[1]/10;
-	send_temp[2] = chip.temp[2]/10;
-	send_temp[3] = chip.temp[3]/10;
 	update_user_interface = 1;
-	
 	
 	switch(change) {
 		
@@ -160,24 +184,8 @@ void change_temperature_hysteresis(int16_t hyst) {
 	user.hysteresis_low = user.target_temp -  user.target_temp_hysteresis;
 }
 
-int16_t get_set_temperature(void) {
-	return user.target_temp / 10;
-}
 
-//Get the light value from a light switch number, not the index. 
-//acceptable inputs are 1,2,3,4.
-bool get_light(uint8_t num){
-	if(num == 0) return 0;
-	if(num > 4) return 0;
-	return chip.lights[num-1];
-}
-bool get_heat(void){
-	return chip.heat;
-}
-bool get_cooling(void){
-	return chip.AC;
-}
-/*Function to turn on a light. This may need to change as those LEDS are in use*/
+/*Function to turn on a light. */
 void light_switch(uint8_t light, bool state) {
 	
 
@@ -187,7 +195,7 @@ void light_switch(uint8_t light, bool state) {
 	//If you turned on a light that isn't supported, return 
 	if(light > 4) return;
 	
-	#ifndef DEBUG_PINS
+
 	//Else, output the state of the light requested
 	if(state) {
 		LPC_GPIO1->FIOSET = ( 1 << light_pin_map[light - 1]);
@@ -195,17 +203,13 @@ void light_switch(uint8_t light, bool state) {
 	else {
 		LPC_GPIO1->FIOCLR = ( 1 << light_pin_map[light - 1]);
 	}
-	#else 
-	if(state) LED_On(light-1);
-	else LED_Off(light-1);
-	#endif
+
 	
-	//Update the current values structure. If you chose different LEDS, change the
-	//Index before you pass it into this one. Or change the index above.
+	//Update the current values structure. 
 	chip.lights[light-1] = state;
 	
-	//Update the app of the change. Need to know iif we need to send it still 
-	update_app(update_light, light);//TODO
+	//Update the app of the change. 
+	update_app(update_light, light);
 }
 
 /* This function switches the state of the heating. Will fail if it tries to 
@@ -214,11 +218,10 @@ bool heat_switch(bool state) {
 
 	//Check to see if we are already there
 	if(chip.heat == state) return 1;
-	//Change this stuff if you actually use something, otherwise just output to 
-	//the LEDs. Do an AC check.
 	
-	#ifndef DEBUG_PINS
 	if(state) {
+		
+		//Do an AC check.
 		if(!chip.AC) {
 			LPC_GPIO3->FIOSET = 1 << 25;
 		}
@@ -227,16 +230,12 @@ bool heat_switch(bool state) {
 	else {
 			LPC_GPIO3->FIOCLR = 1 << 25;
 	}
-	#else
-	if(state) LED_On(6);
-	else LED_Off(6);
-	#endif
 	
 	//Update the current values structure.
 	chip.heat = state;
 	
 	//Notify the app of the heating change
-	update_app(update_heat, 0);//TODO
+	update_app(update_heat, 0);
 	return 1;
 }
 
@@ -247,11 +246,10 @@ bool AC_switch(bool state) {
 	//Check to see if we are already there
 	if(chip.AC == state) return 1;
 	
-	//Change this stuff if you actually use something, otherwise just output to 
-	//the LEDs. Do a heat check.
 	
-	#ifndef DEBUG_PINS
 	if(state) {
+		
+		//Do a heat check.
 		if(!chip.heat) {
 			
 			//Turn on the AC
@@ -259,16 +257,13 @@ bool AC_switch(bool state) {
 		}
 		else return 0;
 	}
+	
 	else {
 		
 		//Turn off the AC
 		LPC_GPIO3->FIOCLR = 1 << 26;
 	}
 	
-	#else
-	if(state) LED_On(7);
-	else LED_Off(7);
-	#endif
 	//Update the current values structure.
 	chip.AC = state;
 	
@@ -277,16 +272,20 @@ bool AC_switch(bool state) {
 	return 1;
 }
 
-/*totally useless function to copy over the last AD conversions to the structure
-You can just use AD last if you want to bypass this. It will be updated to 
-display temp. */
+/*Need to calculate the temperature and see if we need to update the app/UI */
 void adc_calculate_temp(void) {
 	uint8_t i;
 	for(i = 0; i < 4; i++){
+		
+		//Use Y=AX+B to approximate the temperature around room temperature
 		chip.temp[i] = (q15_temp_coefs[0] * AD_last[i] + q15_temp_coefs[1]) >> 15;
+		
+		//Check to see if it made a difference. Don't like /10 everywhere, but whatev
 		if((chip.temp[i]/10) != (temp_last[i]/10)) {
 			update_app(update_temperature, i+1);
 		}
+		
+		//Finally record the last value for next time
 		temp_last[i] = chip.temp[i];
 	}
 }
@@ -295,7 +294,8 @@ void adc_calculate_temp(void) {
 /*Function to check to see if the temperature is outside the bounds, then do 
 something. */
 void check_climate_control(void) {
-	//Choose which temperature to compare against
+	
+	/*Choose which temperature to compare against */
 	int16_t measured_temp;
 	if(user.sensor == 4) {
 		measured_temp = (chip.temp[0] + chip.temp[1] + chip.temp[2] + chip.temp[3]) >> 2;
@@ -325,10 +325,10 @@ void check_climate_control(void) {
 
 /*Function to process the UART command received from the BLE module. These 
 should be set commands, so no messing with these without changing the app
-code too */
+code too. Look in the drive for appropriate commands */
 
 void uart_process_command(char* command) {
-	uint16_t number;
+	int16_t number;
 	bool state;
 	uint8_t index;
 	switch(command[0]) {
@@ -352,7 +352,7 @@ void uart_process_command(char* command) {
 						update_app(update_set_temperature, 0);
 					}
 				}
-			else {
+			else { 
 				number = command[1] - '0';
 				if(number == 1) app_current_screen = app_screen1;
 				if(number == 2) app_current_screen = app_screen2;
@@ -368,12 +368,20 @@ void uart_process_command(char* command) {
 		
 				//Expecting a set temperature s:dd in degrees fahrenheit (x10)
 		case 's' :
+			//Number to store what we read
 			number = 0;
+		
+			//Index of the command
 			index = 2;
+		
+			//State will be used to determine sign
+			state = 0;
 		
 			while(command[index] != ' '){
 				
 				if(command[index] == '.') break;
+				if(command[index] == '-'){state = 1; index++;}
+					
 				
 				number = (number * 10) + command[index++] - '0';
 				if(number > 150) break;
@@ -384,6 +392,11 @@ void uart_process_command(char* command) {
 			
 			//We have the number, now add another digit for the chip
 			number = number * 10;
+			if(state) number = -number;
+			
+			//Check to see if the negative number caused the number to be too small.
+			//This is after the scale x10
+			if(number <= 350) number = 350;
 			
 			change_set_temperature(number);
 		break;
