@@ -21,8 +21,15 @@ void Run_Joystick()
 	}
 }
 
+void Update_Joystick()
+{
+	prev_JOYSTICK = JOYSTICK;
+	//JOYSTICK = ~(LPC_GPIO1->FIOPIN >> 25) & JOYSTICK_MASK;
+}
+
 uint8_t Check_Joystick()
 {
+	JOYSTICK = ~(LPC_GPIO1->FIOPIN >> 25) & JOYSTICK_MASK;
 	if(prev_JOYSTICK == JOYSTICK)
 		return 1;
 	else

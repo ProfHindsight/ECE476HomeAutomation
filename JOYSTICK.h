@@ -9,6 +9,7 @@
 
 void Joystick_Init(void);
 void Run_Joystick(void);
+void Update_Joystick(void);
 uint8_t Check_Joystick(void);
 uint8_t get_joystick(void);
 int get_joystick_horz(void);
