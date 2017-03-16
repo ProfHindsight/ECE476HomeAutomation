@@ -14,6 +14,9 @@
 #include "Serial.h"
 #include "ctp.h"
 
+extern chip_values_struct chip;
+extern int send_temp[4];
+extern bool update_user_interface;
 
 
 // we'll use delay() as a "software delay" function; it should produce 
@@ -87,6 +90,7 @@ int main (void)
   // show that it can be done in different ways;
   while(1)
 	{
+		tar_temp = get_set_temperature();
 		//Update Data
 		
 		
@@ -94,11 +98,21 @@ int main (void)
 		
 		num_lines = Menu_Screen();
 		
+		
+		
 		Menu_Set_Cursor(cursor_line);
 		
 		
-		Run_Joystick();
-	
+		Update_Joystick();
+		while(Check_Joystick())
+		{
+			if(update_user_interface){
+				Menu_Screen_Update_Data(get_set_temperature(), send_temp, chip.lights, get_heat(), get_cooling());
+				update_user_interface = 0;
+			}
+			Update_Joystick();
+		}
+		
 		if(is_joystick(JOY_UP) && cursor_line > 0)
 		{
 			cursor_line -= 1;
@@ -126,23 +140,23 @@ int main (void)
 					}
 					break;
 				case 1:
-					if(cursor_line == 2)
+					if(cursor_line == 8)
 						Menu_Change_Screen(0);
 					break;
 				case 2:
 					switch(cursor_line)
 					{
 						case 1:
-							//Switch light on and off
+							light_switch(1,!chip.lights[0]);
 						break;
 						case 2:
-							//Switch light on and off
+							light_switch(2,!chip.lights[1]);
 						break;
 						case 3:
-							//Switch light on and off
+							light_switch(3,!chip.lights[2]);
 						break;
 						case 4:
-							//Switch light on and off
+							light_switch(4,!chip.lights[3]);
 						break;
 						case 5:
 							Menu_Change_Screen(0);
@@ -159,27 +173,13 @@ int main (void)
 					switch(cursor_line){
 						case 0:
 							tar_temp += delta;
+							change_set_temperature(tar_temp);
 						break;
-					}
-					break;
-				case 2:
-					switch(cursor_line){
-						case 1:
-							//Turn on/off lights
-							break;
-						case 2:
-							//Turn on/off lights
-							break;
-						case 3:
-							//Turn on/off lights
-							break;
-						case 4:
-							//Turn on/off lights
-							break;
 					}
 					break;
 			}
 		}
+		
 		
 		
 	}

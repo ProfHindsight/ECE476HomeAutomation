@@ -132,7 +132,7 @@ void SysTick_Handler (void) // SysTick Interrupt Handler (10ms);
 	ticks++;
 	
 	//See if 1 second has passed
-	if(adcTicks++ >= 500) {
+	if(adcTicks++ >= 100) {
 		ADC_StartCnv();
 		adcTicks = 0;
 	}
