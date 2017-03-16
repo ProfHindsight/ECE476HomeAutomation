@@ -56,9 +56,9 @@ void Menu_Screen_Update_Data(int target_temp, int* room_temps, uint8_t* room_lig
 		break;
 		case 2:
 			Menu_Set_OnOffData(room_lights[0],1);
-			Menu_Set_OnOffData(room_lights[0],2);
-			Menu_Set_OnOffData(room_lights[0],3);
-			Menu_Set_OnOffData(room_lights[0],4);
+			Menu_Set_OnOffData(room_lights[1],2);
+			Menu_Set_OnOffData(room_lights[2],3);
+			Menu_Set_OnOffData(room_lights[3],4);
 		break;
 	}
 }

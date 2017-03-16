@@ -33,7 +33,8 @@ void Menu_Set_Line(uint8_t* menu_item, unsigned int menu_line)
 void Menu_Set_Data(int menu_data, unsigned int menu_line)
 {
 	char data[4];
-	sprintf(data,"%d",menu_data);
+	LCD_PutText(menu_x_pos_data, menu_y_pos+menu_line_spacing*menu_line, "      ", White ,Black);
+	sprintf(data,"%i",menu_data);
 	LCD_PutText(menu_x_pos_data, menu_y_pos+menu_line_spacing*menu_line, data, White ,Black);
 }
 
