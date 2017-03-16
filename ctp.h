@@ -9,7 +9,7 @@
 #define __CTP_H
 
 //Flag to set when an onboard UI update is available
-volatile bool update_user_interface;
+//volatile bool update_user_interface = 0;
 
 
 //Quick enumeration typedef to keep track of which room to monitor

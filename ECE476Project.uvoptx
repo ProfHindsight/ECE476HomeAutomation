@@ -82,17 +82,17 @@
         <Book>
           <Number>0</Number>
           <Title>MCB1700 Quick Start Guide (MCB1700)</Title>
-          <Path>T:\Keil_v5\ARM\PACK\Keil\LPC1700_DFP\2.3.0\Boards\Keil\MCB1700\Documentation\MCB1700_QSG.pdf</Path>
+          <Path>C:\Keil_v5\ARM\PACK\Keil\LPC1700_DFP\2.3.0\Boards\Keil\MCB1700\Documentation\MCB1700_QSG.pdf</Path>
         </Book>
         <Book>
           <Number>1</Number>
           <Title>MCB1700 Schematics (MCB1700)</Title>
-          <Path>T:\Keil_v5\ARM\PACK\Keil\LPC1700_DFP\2.3.0\Boards\Keil\MCB1700\Documentation\mcb1700-schematics.pdf</Path>
+          <Path>C:\Keil_v5\ARM\PACK\Keil\LPC1700_DFP\2.3.0\Boards\Keil\MCB1700\Documentation\mcb1700-schematics.pdf</Path>
         </Book>
         <Book>
           <Number>2</Number>
           <Title>User Manual (MCB1700)</Title>
-          <Path>T:\Keil_v5\ARM\PACK\Keil\LPC1700_DFP\2.3.0\Boards\Keil\MCB1700\Documentation\mcb1700.chm</Path>
+          <Path>C:\Keil_v5\ARM\PACK\Keil\LPC1700_DFP\2.3.0\Boards\Keil\MCB1700\Documentation\mcb1700.chm</Path>
         </Book>
         <Book>
           <Number>3</Number>

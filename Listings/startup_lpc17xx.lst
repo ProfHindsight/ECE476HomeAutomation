@@ -432,12 +432,12 @@ ARM Macro Assembler    Page 7
               00000000 
 Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M3 --apcs=interw
 ork --depend=.\objects\startup_lpc17xx.d -o.\objects\startup_lpc17xx.o -I"C:\Us
-ers\matt\Documents\ECE 476\ECE476HomeAutomation-master\RTE\Device\LPC1768" -I"C
-:\Users\matt\Documents\ECE 476\ECE476HomeAutomation-master\RTE\_Target_1" -IC:\
-Keil_v5\ARM\PACK\ARM\CMSIS\5.0.0\CMSIS\Include -IC:\Keil_v5\ARM\PACK\Keil\LPC17
-00_DFP\2.3.0\Device\Include --predefine="__EVAL SETA 1" --predefine="__UVISION_
-VERSION SETA 522" --predefine="_RTE_ SETA 1" --predefine="LPC175x_6x SETA 1" --
-list=.\listings\startup_lpc17xx.lst RTE\Device\LPC1768\startup_LPC17xx.s
+ers\matt\Documents\ECE 476\ECE476HomeAutomation\RTE\Device\LPC1768" -I"C:\Users
+\matt\Documents\ECE 476\ECE476HomeAutomation\RTE\_Target_1" -IC:\Keil_v5\ARM\PA
+CK\ARM\CMSIS\5.0.0\CMSIS\Include -IC:\Keil_v5\ARM\PACK\Keil\LPC1700_DFP\2.3.0\D
+evice\Include --predefine="__EVAL SETA 1" --predefine="__UVISION_VERSION SETA 5
+22" --predefine="_RTE_ SETA 1" --predefine="LPC175x_6x SETA 1" --list=.\listing
+s\startup_lpc17xx.lst RTE\Device\LPC1768\startup_LPC17xx.s
 
 
 
